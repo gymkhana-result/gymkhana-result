@@ -1,27 +1,31 @@
 $path = "C:\LapRecorder\Result"
-$filter = "index.html"
+$file = "index.html"
+$fullPath = Join-Path $path $file
 
-$lastRun = Get-Date "2000-01-01"
-
-$watcher = New-Object System.IO.FileSystemWatcher
-$watcher.Path = $path
-$watcher.Filter = $filter
-$watcher.EnableRaisingEvents = $true
-
-Register-ObjectEvent $watcher Changed -Action {
-    $now = Get-Date
-    if (($now - $lastRun).TotalSeconds -lt 10) { return }
-
-    $script:lastRun = $now
-    Start-Sleep -Seconds 2
-
-    Set-Location $path
-    git add .
-    git commit -m "auto update"
-    git push
-
-    Write-Host "Pushed at $now"
-}
+$lastWrite = (Get-Item $fullPath).LastWriteTime
 
 Write-Host "Watching for changes..."
-while ($true) { Start-Sleep 5 }
+
+while ($true) {
+
+    Start-Sleep -Seconds 5
+
+    $currentWrite = (Get-Item $fullPath).LastWriteTime
+
+    if ($currentWrite -ne $lastWrite) {
+
+        $lastWrite = $currentWrite
+
+        Write-Host "Change detected at $currentWrite"
+
+        $content = Get-Content $fullPath -Encoding Shift_JIS
+        Set-Content $fullPath -Value $content -Encoding UTF8
+
+        Set-Location $path
+        git add .
+        git commit -m "auto update"
+        git push
+
+        Write-Host "Converted & Pushed"
+    }
+}
