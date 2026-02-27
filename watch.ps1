@@ -2,9 +2,9 @@ $path = "C:\LapRecorder\Result"
 $file = "index.html"
 $fullPath = Join-Path $path $file
 
-$lastWrite = (Get-Item $fullPath).LastWriteTime
-
 Write-Host "Watching for changes..."
+
+$lastWrite = (Get-Item $fullPath).LastWriteTime
 
 while ($true) {
 
@@ -15,7 +15,6 @@ while ($true) {
     if ($currentWrite -ne $lastWrite) {
 
         $lastWrite = $currentWrite
-
         Write-Host "Change detected at $currentWrite"
 
         $content = Get-Content $fullPath -Encoding Default
