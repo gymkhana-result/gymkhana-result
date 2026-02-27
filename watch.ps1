@@ -18,7 +18,7 @@ while ($true) {
 
         Write-Host "Change detected at $currentWrite"
 
-        $content = Get-Content $fullPath -Encoding Shift_JIS
+        $content = Get-Content $fullPath -Encoding Default
         Set-Content $fullPath -Value $content -Encoding UTF8
 
         Set-Location $path
