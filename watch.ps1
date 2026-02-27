@@ -17,14 +17,11 @@ while ($true) {
         $lastWrite = $currentWrite
         Write-Host "Change detected at $currentWrite"
 
-        $content = Get-Content $fullPath -Encoding Default
-        Set-Content $fullPath -Value $content -Encoding UTF8
-
         Set-Location $path
         git add .
         git commit -m "auto update"
         git push
 
-        Write-Host "Converted & Pushed"
+        Write-Host "Pushed"
     }
 }
