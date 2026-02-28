@@ -16,11 +16,13 @@ while ($true) {
 
         Write-Host "Change detected at $currentWrite"
 
-        # Shift_JIS → UTF-8 変換
-        $content = Get-Content $fullPath -Encoding Default
-        Set-Content $fullPath -Value $content -Encoding UTF8
+        # Shift_JIS 明示指定で読む
+        $content = Get-Content $fullPath -Encoding Shift_JIS
 
-        # 変換後の更新時刻を再取得（無限ループ防止）
+        # UTF8 (BOM付き) で明示保存
+        $utf8 = New-Object System.Text.UTF8Encoding $true
+        [System.IO.File]::WriteAllLines($fullPath, $content, $utf8)
+
         $lastWrite = (Get-Item $fullPath).LastWriteTime
 
         Set-Location $path
