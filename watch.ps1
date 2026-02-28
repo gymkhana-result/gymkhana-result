@@ -9,30 +9,43 @@ $lastWrite = (Get-Item $fullPath).LastWriteTime
 while ($true) {
 
     Start-Sleep -Seconds 5
-
     $currentWrite = (Get-Item $fullPath).LastWriteTime
 
     if ($currentWrite -ne $lastWrite) {
 
-        Write-Host "Change detected at $currentWrite"
+        Write-Host "Change detected. Waiting for file to stabilize..."
 
-        # Shift_JIS(Default)で読む
-        $content = Get-Content $fullPath -Encoding Default
+        # 安定待ち（10秒）
+        Start-Sleep -Seconds 10
 
-        # charsetを書き換え
-        $content = $content -replace "charset=shift_jis", "charset=utf-8"
+        $checkWrite = (Get-Item $fullPath).LastWriteTime
 
-        # UTF8(BOM付き)で保存
-        $utf8 = New-Object System.Text.UTF8Encoding $true
-        [System.IO.File]::WriteAllLines($fullPath, $content, $utf8)
+        # 10秒後に変更がなければ確定
+        if ($checkWrite -eq $currentWrite) {
 
-        $lastWrite = (Get-Item $fullPath).LastWriteTime
+            Write-Host "File stabilized. Converting & Pushing..."
 
-        Set-Location $path
-        git add .
-        git commit -m "auto update (utf8 fixed)"
-        git push
+            # Shift_JIS(Default)で読む
+            $content = Get-Content $fullPath -Encoding Default
 
-        Write-Host "Converted to UTF8 & Pushed"
+            # charsetを書き換え
+            $content = $content -replace "charset=shift_jis", "charset=utf-8"
+
+            # UTF8(BOM付き)で保存
+            $utf8 = New-Object System.Text.UTF8Encoding $true
+            [System.IO.File]::WriteAllLines($fullPath, $content, $utf8)
+
+            $lastWrite = (Get-Item $fullPath).LastWriteTime
+
+            Set-Location $path
+            git add .
+            git commit -m "auto update (stable)"
+            git push
+
+            Write-Host "Converted & Pushed"
+        }
+        else {
+            Write-Host "File still changing. Skipped."
+        }
     }
 }
