@@ -16,10 +16,10 @@ while ($true) {
 
         Write-Host "Change detected at $currentWrite"
 
-        # Shift_JIS 明示指定で読む
-        $content = Get-Content $fullPath -Encoding Shift_JIS
+        # Default(=Shift_JIS)で読む
+        $content = Get-Content $fullPath -Encoding Default
 
-        # UTF8 (BOM付き) で明示保存
+        # UTF8(BOM付き)で保存
         $utf8 = New-Object System.Text.UTF8Encoding $true
         [System.IO.File]::WriteAllLines($fullPath, $content, $utf8)
 
